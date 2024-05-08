@@ -1,60 +1,89 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
-public class SistemaEntregaPizzas {
-    public static void main(String[] args) {
-        Restaurante restaurante = new Restaurante();
+class SistemaEntregaPizzas {
+    private int opcao = 4;
 
-        // Listar opções de pizzas
-        restaurante.listarOpcoesPizzas();
+    private Queue<Pedido> filaPedidos = new LinkedList<>();
+    private List<Entregador> entregadores = new ArrayList<>();
+    private List<Pizza> pizzasSendoFeitas = new ArrayList<>();
 
-        // Receber pedidos
-        PedidoPizza pedido1 = new PedidoPizza("João", "123456789", "Rua A, 123", "marguerita", "grande");
-        restaurante.receberPedido(pedido1);
+    private Scanner scanner = new Scanner(System.in);;
 
-        PedidoPizza pedido2 = new PedidoPizza("Maria", "987654321", "Rua B, 456", "calabresa", "família");
-        restaurante.receberPedido(pedido2);
+    public SistemaEntregaPizzas() {
 
-        // Iniciar o processo de preparo e entrega das pizzas
-        restaurante.iniciarProcessoEntrega();
-    }
-}
-
-class Restaurante {
-    private List<String> opcoesPizzas;
-    private Queue<PedidoPizza> filaPedidos;
-    private List<Entregador> entregadores;
-    private List<Pizza> pizzasSendoFeitas;
-
-    public Restaurante() {
-        this.opcoesPizzas = new ArrayList<>();
-        this.opcoesPizzas.add("marguerita");
-        this.opcoesPizzas.add("calabresa");
-        this.opcoesPizzas.add("4 queijos");
-        this.opcoesPizzas.add("chocolate");
-        this.opcoesPizzas.add("strogonoff");
-
-        this.filaPedidos = new LinkedList<>();
-        this.entregadores = new ArrayList<>();
         this.entregadores.add(new Entregador("Entregador 1"));
         this.entregadores.add(new Entregador("Entregador 2"));
         this.entregadores.add(new Entregador("Entregador 3"));
 
-        this.pizzasSendoFeitas = new ArrayList<>();
+    }
+
+    public void init() {
+        do {
+
+            System.out.println("Qual ação deseja realizar? " +
+                    "\n1 - Listar opções de pizzas " +
+                    "\n2 - Receber pedido " +
+                    "\n3 - Despachar pizzas para entrega " +
+                    "\n4 - Listar pizzas pedidos " +
+                    "\n0 - Sair");
+            opcao = scanner.nextInt();
+
+            switch(opcao) {
+                case 0:
+                    break;
+                case 1:
+                    listarOpcoesPizzas();
+                    break;
+                case 2:
+                    receberPedido();
+                    break;
+                case 3:
+                    iniciarProcessoEntrega();
+                    break;
+                case 4:
+                    listarPedidos();
+                    break;
+                default:
+                    System.out.println("Opção inválida, tente novamente!");
+            }
+        } while(opcao != 0);
     }
 
     public void listarOpcoesPizzas() {
-        System.out.println("Opções de pizzas disponíveis:");
-        for (String pizza : opcoesPizzas) {
-            System.out.println("- " + pizza);
-        }
+        System.out.println("Opções de pizza: " +
+                "\n1 - Marguerita " +
+                "\n2 - Calabresa " +
+                "\n3 - 4 Queijos " +
+                "\n4 - Chocolate " +
+                "\n5 - Strogonoff ");
     }
 
-    public void receberPedido(PedidoPizza pedido) {
+    public void receberPedido() {
+        // Criando pedido
+        Pedido pedido = new Pedido();
+
+        // Nome
+        System.out.println("Nome do cliente: ");
+        pedido.setNomeCliente(scanner.nextLine());
+
+        scanner.nextLine();
+
+        // Telefone
+        System.out.println("Telefone do cliente: ");
+        pedido.setTelefone(scanner.nextLine());
+
+        // Endereço
+        System.out.println("Endereço: ");
+        pedido.setEndereco(scanner.nextLine());
+
+        // Sabor
+        System.out.println("Sabor: ");
+        pedido.setSabor(scanner.nextLine());
+
+        // Tamanho
+        System.out.println("Tamanho: ");
+        pedido.setTamanho(scanner.nextLine());
+
         filaPedidos.add(pedido);
         System.out.println("Pedido recebido: " + pedido);
     }
@@ -65,15 +94,23 @@ class Restaurante {
             despacharPizzas();
         }
     }
+    public void listarPedidos() {
+        System.out.println("Fila de Pedidos:");
+        for (Pedido pedido : filaPedidos) {
+            System.out.println(pedido);
+        }
+    }
 
     private void prepararPizzas() {
-        int pizzasPreparadas = 0;
-        while (!filaPedidos.isEmpty() && pizzasPreparadas < 6) {
-            PedidoPizza pedido = filaPedidos.poll();
-            Pizza pizza = new Pizza(pedido.getSabor(), pedido.getTamanho());
-            pizzasSendoFeitas.add(pizza);
-            System.out.println("Pizza " + pizza.getSabor() + " (" + pizza.getTamanho() + ") sendo preparada.");
-            pizzasPreparadas++;
+        while (!filaPedidos.isEmpty() && pizzasSendoFeitas.size() < 6) {
+            Pedido pedido = filaPedidos.poll();
+            if (pedido != null ) {
+                Pizza pizza = new Pizza(pedido.getSabor(), pedido.getTamanho());
+                pizzasSendoFeitas.add(pizza);
+                System.out.println("Pizza " + pizza.getSabor() + " (" + pizza.getTamanho() + ") sendo preparada.");
+            } else {
+                break;
+            }
         }
     }
 
@@ -90,64 +127,5 @@ class Restaurante {
         Entregador entregador = entregadores.remove(0);
         entregadores.add(entregador);
         return entregador;
-    }
-}
-
-class PedidoPizza {
-    private String nomeCliente;
-    private String telefone;
-    private String endereco;
-    private String sabor;
-    private String tamanho;
-
-    public PedidoPizza(String nomeCliente, String telefone, String endereco, String sabor, String tamanho) {
-        this.nomeCliente = nomeCliente;
-        this.telefone = telefone;
-        this.endereco = endereco;
-        this.sabor = sabor;
-        this.tamanho = tamanho;
-    }
-
-    public String getSabor() {
-        return sabor;
-    }
-
-    public String getTamanho() {
-        return tamanho;
-    }
-
-    @Override
-    public String toString() {
-        return "Pedido de " + sabor + " (" + tamanho + ") para " + nomeCliente + ", telefone " + telefone + ", endereço " + endereco;
-    }
-}
-
-class Pizza {
-    private String sabor;
-    private String tamanho;
-
-    public Pizza(String sabor, String tamanho) {
-        this.sabor = sabor;
-        this.tamanho = tamanho;
-    }
-
-    public String getSabor() {
-        return sabor;
-    }
-
-    public String getTamanho() {
-        return tamanho;
-    }
-}
-
-class Entregador {
-    private String nome;
-
-    public Entregador(String nome) {
-        this.nome = nome;
-    }
-
-    public void entregarPizza(Pizza pizza) {
-        System.out.println("Pizza " + pizza.getSabor() + " (" + pizza.getTamanho() + ") sendo entregue por " + nome);
     }
 }
